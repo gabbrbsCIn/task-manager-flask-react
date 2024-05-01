@@ -1,7 +1,5 @@
 # To-Do List API
 
-Este é um projeto de estudo que consiste em uma API em Python utilizando o framework FlaskAPI. A API é um pequeno sistema de gerenciamento de tarefas que inclui funcionalidades básicas de login, cadastro de usuários, criação de listas de tarefas e adição de tarefas a essas listas.
-
 ## Tecnologias Utilizadas
 
 - Flask
