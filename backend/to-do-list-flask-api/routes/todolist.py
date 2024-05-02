@@ -17,20 +17,18 @@ from flask_login import login_user, login_required, logout_user, current_user
 
 
 #Rotas da Lista de Tarefas
-@app.route("/todolist", methods=['GET'])
-@login_required
+@app.route("/todolist", methods=['POST'])
 def get_todolist():
-    user_id = current_user.id
+    user_id = request.json["userId"]
     all_todolist = ListaDeTarefas.query.filter_by(usuario_id=user_id).all()
     if not all_todolist:
         return jsonify({'msg': 'Não há listas de tarefas cadastradas.'})
     result = listadetarefas_schema.dump(all_todolist)
     return jsonify(result)
 
-@app.route("/todolist", methods=['POST'])
-@login_required
+@app.route("/create_todolist", methods=['POST'])
 def add_todolist():
-    user_id = current_user.id
+    user_id = request.json["userId"]
     titulo = request.json["titulo"]  
     descricao = request.json.get("descricao")
 
@@ -40,29 +38,6 @@ def add_todolist():
 
     return listadetarefa_schema.jsonify(new_todolist)
 
-@app.route("/todolist/<id>", methods=['PUT'])
-@login_required
-def update_todolist(id):
-    todolist = ListaDeTarefas.query.get(id)
-    error = check_permission(todolist)
-    if error:
-        return error
-
-    titulo = request.json.get("titulo")  
-    descricao = request.json.get("descricao")
-
-    if descricao is None:
-        descricao = todolist.descricao
-    
-    if titulo is None:
-        titulo = todolist.titulo
-
-    todolist.titulo = titulo
-    todolist.descricao = descricao
-    
-    db.session.commit()
-
-    return listadetarefa_schema.jsonify(todolist)
 
 
 @app.route("/todolist/<id>", methods=['DELETE'])

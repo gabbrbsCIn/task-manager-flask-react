@@ -1,9 +1,12 @@
 import os
 from flask import Flask
+from flask_cors import CORS
 from config.initializers import init_app
 
 app = Flask(__name__)
 app.config.from_pyfile('config/config.py')
+
+CORS(app)
 
 app_user = init_app(app)
 db = app_user[0]

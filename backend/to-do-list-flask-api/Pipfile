@@ -15,6 +15,8 @@ wtforms = "*"
 email-validator = "*"
 python-dotenv = "*"
 flask-migrate = "*"
+psycopg2 = "*"
+flask-cors = "*"
 
 [dev-packages]
 

@@ -25,6 +25,7 @@ def add_user():
     new_user = Usuario(nome,email,hashed_password)
     db.session.add(new_user)
     db.session.commit()
+    print(new_user)
 
     return usuario_schema.jsonify(new_user)
 
@@ -39,8 +40,8 @@ def login():
     if user:
         if bcrypt.check_password_hash(user.senha, senha):
             login_user(user)
-            return jsonify({'msg':'logado com sucesso!'})
-    return jsonify({'erro': 'Usuário não encontrado'})
+            return jsonify({"nome": user.nome, "email": user.email, "id": user.id})
+    return jsonify({'msg': 'Usuário ou senha incorretos!'}), 400
 
 @app.route('/logout', methods=['GET','POST'])
 @login_required

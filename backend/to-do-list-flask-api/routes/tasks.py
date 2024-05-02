@@ -18,13 +18,9 @@ from utils.getTasksByStatus import get_tasks_by_status
 
 # Rotas da Tarefa
 @app.route("/todolist/<id>/task", methods=['POST'])
-@login_required
 def add_task(id):
     todolist = ListaDeTarefas.query.get(id)
-    error = check_permission(todolist)
-    if error:
-        return error
-
+    
     titulo = request.json["titulo"]
     descricao = request.json.get("descricao")
     status = "A fazer"
@@ -40,7 +36,6 @@ def add_task(id):
     return tarefa_schema.jsonify(new_task)
 
 @app.route("/todolist/<id>/task/<id_task>/doing", methods=['PUT'])
-@login_required
 def update_status_task_doing(id, id_task):
     todolist = ListaDeTarefas.query.get(id)
     error = check_permission(todolist)
@@ -56,7 +51,6 @@ def update_status_task_doing(id, id_task):
     return tarefa_schema.jsonify(task)
 
 @app.route("/todolist/<id>/task/<id_task>/done", methods=['PUT'])
-@login_required
 def update_status_task_done(id, id_task):
     todolist = ListaDeTarefas.query.get(id)
     error = check_permission(todolist)
@@ -71,13 +65,9 @@ def update_status_task_done(id, id_task):
     db.session.commit()
     return tarefa_schema.jsonify(task)
 
-@app.route("/todolist/<id>/task/<id_task>", methods=['PUT'])
-@login_required
+@app.route("/todolist/<id>/task/p/<id_task>", methods=['PUT'])
 def update_task_priority(id, id_task):
     todolist = ListaDeTarefas.query.get(id)
-    error = check_permission(todolist)
-    if error:
-        return error
 
     task = get_task_by_id(id_task)
     if task.lista_de_tarefas_id != int(id):
@@ -98,13 +88,34 @@ def update_task_priority(id, id_task):
     db.session.commit()
     return tarefa_schema.jsonify(task)
 
+@app.route("/todolist/<id>/task/<id_task>", methods=['PUT'])
+def update_task(id, id_task):
+    todolist = ListaDeTarefas.query.get(id)
+
+    task = get_task_by_id(id_task)
+    if task.lista_de_tarefas_id != int(id):
+        return jsonify({'erro': 'Tarefa não encontrada nesta lista!'})
+
+    titulo = request.json.get("titulo")
+    descricao = request.json.get("descricao")
+    status = request.json.get("status")
+    prioridade = request.json.get("prioridade")
+
+    if titulo:
+        task.titulo = titulo
+    if descricao:
+        task.descricao = descricao
+    if status:
+        task.status = status
+    if prioridade:
+        task.prioridade = prioridade
+
+    db.session.commit()
+    return tarefa_schema.jsonify(task)
+
 @app.route("/todolist/<id>/task", methods=['GET'])
-@login_required
 def get_tasks(id):
     todolist = ListaDeTarefas.query.get(id)
-    error = check_permission(todolist)
-    if error:
-        return error
 
     all_tasks = Tarefa.query.filter_by(lista_de_tarefas_id=id).all()
 
@@ -115,12 +126,8 @@ def get_tasks(id):
     return jsonify(result)
 
 @app.route("/todolist/<id>/task/<id_task>", methods=['DELETE'])
-@login_required
 def delete_task(id, id_task):
     todolist = ListaDeTarefas.query.get(id)
-    error = check_permission(todolist)
-    if error:
-        return error
 
     task = get_task_by_id(id_task)
     if task.lista_de_tarefas_id != int(id):
@@ -130,30 +137,7 @@ def delete_task(id, id_task):
     db.session.commit()
     return jsonify({'msg': 'Tarefa excluída com sucesso!'})
 
-@app.route("/todolist/<id>/task/done", methods=['GET'])
-@login_required
-def get_task_done(id):
-    return get_tasks_by_status(id, "Concluída")
 
-@app.route("/todolist/<id>/task/doing", methods=['GET'])
-@login_required
-def get_task_doing(id):
-    return get_tasks_by_status(id, "Fazendo")
 
-@app.route("/todolist/<id>/task/todo", methods=['GET'])
-@login_required
-def get_task_todo(id):
-    return get_tasks_by_status(id, "A fazer")
 
-    if todolist is None:
-        return jsonify({'erro': 'Lista de Tarefa não encontrada!'})
-    if todolist.usuario_id != current_user.id:
-        return jsonify({'erro': 'Você não tem permissão para ver tarefas desta lista!'})    
-
-    all_tasks_todo = Tarefa.query.filter_by(status="A fazer", lista_de_tarefas_id=id).all()
     
-    if not all_tasks_todo:
-        return jsonify({'msg': 'Não há tarefas a fazer nesta lista.'})
-    
-    result = tarefas_schema.dump(all_tasks_todo)
-    return jsonify(result)
